@@ -1,0 +1,106 @@
+{
+  "task": "train_Uniwin_SRx4_DF2K_from_scratch",
+  "model": "plain",
+  "gpu_ids": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "dist": true,
+  "scale": 4, // 2 | 3 | 4 | 8
+  "n_channels": 3, // broadcast to "datasets", 1 for grayscale, 3 for color
+  "path": {
+    "root": "superresolution",
+    "pretrained_netG": null, // path of pretrained model.
+    "pretrained_netE": null // path of pretrained model
+  },
+  "datasets": {
+    "train": {
+      "name": "DF2K",
+      "type": "PairedImageDataset", // ImageNetPairedDataset | PairedImageDataset
+      "meta_info_file": "trainsets/DF2K/DF2K_HR_sub.lmdb/meta_info.txt",
+      "io_backend": {
+        "type": "lmdb" // read training images from lmdb
+      },
+      "scale": 4,
+      "dataset_type": "sr",
+      "dataroot_H": "trainsets/DF2K/DF2K_HR_sub.lmdb", // path of H training dataset.
+      "dataroot_L": "trainsets/DF2K/DF2K_LR_bicubic/X4_sub.lmdb", // path of L training dataset.
+      "H_size": 256, // 128|192|256|512. LR patch size is set to 64
+      "use_hflip": true, // we use random horizontal flip for data augmentation
+      "use_rot": true, // we use random 90|180|270 rotation for data augmentation
+      "dataloader_shuffle": true,
+      "dataloader_num_workers": 32,
+      "dataloader_batch_size": 32 // batch size 32. Total batch size =4x8=32 in Uniwin
+    },
+    "test": {
+      "name": "Set5",
+      "type": "PairedImageDataset", // ImageNetPairedDataset | PairedImageDataset
+      "io_backend": {
+        "type": "disk" // read testing images from disk
+      },
+      "filename_tmpl": "{}x4", // template of file names of test images (ex) babyx2.png
+      "dataset_type": "sr",
+      "dataroot_H": "testsets/Set5/HR", // path of H testing dataset
+      "dataroot_L": "testsets/Set5/LR_bicubic/X4" // path of L testing dataset
+    }
+  },
+  "netG": {
+    "net_type": "uniwin",
+    "upscale": 4, // 2 | 3 | 4 | 8
+    "in_chans": 3,
+    "img_size": 64, // LR patch size is set 64
+    "window_size": 16,
+    "kernel_size": 9, // 7 | 9 | 11
+    "img_range": 1.0,
+    "depths": [
+      6,
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "embed_dim": 180,
+    "layer_scale": 1e-5,
+    "num_heads": [
+      6,
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "mlp_ratio": 2,
+    "upsampler": "pixelshuffle",
+    "resi_connection": "1conv", // "1conv" | "3conv"
+    "init_type": "default"
+  },
+  "train": {
+    "manual_seed": 42,
+    "G_lossfn_type": "l1", // "l1" preferred | "l2sum" | "l2" | "ssim" | "charbonnier"
+    "G_lossfn_weight": 1.0, // default
+    "E_decay": 0.999, // Exponential Moving Average for netG: set 0 to disable; default setting 0.999
+    "G_optimizer_type": "adam", // fixed, adam is enough
+    "G_optimizer_lr": 2e-4, // learning rate
+    "G_optimizer_wd": 0, // weight decay, default 0
+    "G_optimizer_clipgrad": null, // unused
+    "G_optimizer_reuse": true,
+    "G_scheduler_type": "MultiStepLR", // "MultiStepLR" is enough
+    "G_scheduler_milestones": [
+      250000,
+      400000,
+      450000,
+      475000
+    ], // total iteration: 500000
+    "G_scheduler_gamma": 0.5,
+    "G_regularizer_orthstep": null, // unused
+    "G_regularizer_clipstep": null, // unused
+    "G_param_strict": true,
+    "E_param_strict": true,
+    "checkpoint_test": 5000, // for testing
+    "checkpoint_save": 5000, // for saving model
+    "checkpoint_print": 200 // for print
+  }
+}
