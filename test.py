@@ -142,8 +142,8 @@ def define_model(opt):
     opt_net = opt['netG']
     net_type = opt_net['net_type']
     
-    if net_type == 'swinir_nat':
-        from networks.uniwin import Uniwin as net
+    if net_type == 'uniwin':
+        from networks.network_uniwin import Uniwin as net
         model = net(
             upscale=opt_net['upscale'],
             in_chans=opt_net['in_chans'],
@@ -278,7 +278,7 @@ def test(args):
 
 
 if __name__ == '__main__':
-    test_opt_list = ['uniwin_x2_patch64_win16_kernel9_Imagenet800K']
+    test_opt_list = ['train_Uniwin_SRx2_ImageNet_from_scratch']
     test_benchmark_list = ['Set5', 'Set14', 'BSDS100', 'urban100', 'manga109']
 
     parser = argparse.ArgumentParser()
