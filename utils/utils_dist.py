@@ -17,8 +17,25 @@ def init_dist(launcher, backend='nccl', **kwargs):
         _init_dist_pytorch(backend, **kwargs)
     elif launcher == 'slurm':
         _init_dist_slurm(backend, **kwargs)
+    elif launcher == 'pytorch_multi_machine':
+        _init_dist_pytorch_multi(backend, **kwargs)
     else:
         raise ValueError(f'Invalid launcher type: {launcher}')
+
+
+def _init_dist_pytorch_multi(backend, **kwargs):
+    for key, value in kwargs.items():
+        if key == 'world_size':
+            world_size = value
+    rank = int(os.environ['RANK'])
+    num_gpus = torch.cuda.device_count()
+    torch.cuda.set_device(rank % num_gpus)
+    dist.init_process_group(
+        backend=backend, 
+        init_method='tcp://166.104.112.198:29500', 
+        rank=rank, 
+        world_size=world_size
+    )
 
 
 def _init_dist_pytorch(backend, **kwargs):

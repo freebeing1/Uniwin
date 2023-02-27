@@ -43,7 +43,8 @@ def main(json_path='options/swinir_lmdb.json'):
 
     # distributed settings
     if opt['dist']:
-        init_dist('pytorch')
+        # init_dist('pytorch')
+        init_dist('pytorch_multi_machine', world_size=9)
     opt['rank'], opt['world_size'] = get_dist_info()
 
     if opt['rank'] == 0:
