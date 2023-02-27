@@ -1,5 +1,5 @@
 {
-  "task": "train_Uniwin_SRx2_fientune_from_ImageNet_pretrain",
+  "task": "train_Uniwin_SRx2_finetune_from_ImageNet_pretrain",
   "model": "plain",
   "gpu_ids": [
     0,
