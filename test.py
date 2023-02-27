@@ -278,7 +278,7 @@ def test(args):
 
 
 if __name__ == '__main__':
-    test_opt_list = ['train_Uniwin_SRx2_ImageNet_from_scratch']
+    test_opt_list = ['train_Uniwin_SRx2_fientune_from_ImageNet_pretrain']
     test_benchmark_list = ['Set5', 'Set14', 'BSDS100', 'urban100', 'manga109']
 
     parser = argparse.ArgumentParser()
@@ -287,8 +287,8 @@ if __name__ == '__main__':
     parser.add_argument('--tile', type=int, default=None)
     parser.add_argument('--benchmarks', type=str,
                         default=test_benchmark_list)
-    parser.add_argument('--unit_iter', type=int, default=800000)
-    parser.add_argument('--max_iter', type=int, default=800000)
+    parser.add_argument('--unit_iter', type=int, default=100000)
+    parser.add_argument('--max_iter', type=int, default=100000)
     args = parser.parse_args()
 
     if args.opt is not None:

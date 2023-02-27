@@ -1,5 +1,5 @@
 {
-  "task": "train_Uniwin_SRx3_fientune_from_ImageNet_pretrain",
+  "task": "train_Uniwin_SRx4_finetune_from_ImageNet_pretrain",
   "model": "plain",
   "gpu_ids": [
     0,
@@ -8,11 +8,11 @@
     3
   ],
   "dist": true,
-  "scale": 3, // 2 | 3 | 4 | 8
+  "scale": 4, // 2 | 3 | 4 | 8
   "n_channels": 3, // broadcast to "datasets", 1 for grayscale, 3 for color
   "path": {
     "root": "superresolution",
-    "pretrained_netG": "superresolution/train_Uniwin_SRx3_ImageNet_from_scratch/models/800000_G.pth", // path of pretrained model.
+    "pretrained_netG": "superresolution/train_Uniwin_SRx4_ImageNet_from_scratch/models/800000_G.pth", // path of pretrained model.
     "pretrained_netE": null // path of pretrained model
   },
   "datasets": {
@@ -23,11 +23,11 @@
       "io_backend": {
         "type": "lmdb" // read training images from lmdb
       },
-      "scale": 3,
+      "scale": 4,
       "dataset_type": "sr",
       "dataroot_H": "trainsets/DF2K/DF2K_HR_sub.lmdb", // path of H training dataset.
-      "dataroot_L": "trainsets/DF2K/DF2K_LR_bicubic/X3_sub.lmdb", // path of L training dataset. 
-      "H_size": 192, // 128|192|256|512. LR patch size is set to 64
+      "dataroot_L": "trainsets/DF2K/DF2K_LR_bicubic/X4_sub.lmdb", // path of L training dataset. 
+      "H_size": 256, // 128|192|256|512. LR patch size is set to 64
       "use_hflip": true, // we use random horizontal flip for data augmentation
       "use_rot": true, // we use random 90|180|270 rotation for data augmentation
       "dataloader_shuffle": true,
@@ -40,15 +40,15 @@
       "io_backend": {
         "type": "disk" // read testing images from disk
       },
-      "filename_tmpl": "{}x3", // template of file names of test images (ex) babyx2.png
+      "filename_tmpl": "{}x4", // template of file names of test images (ex) babyx2.png
       "dataset_type": "sr",
       "dataroot_H": "testsets/Set5/HR", // path of H testing dataset
-      "dataroot_L": "testsets/Set5/LR_bicubic/X3" // path of L testing dataset
+      "dataroot_L": "testsets/Set5/LR_bicubic/X4" // path of L testing dataset
     }
   },
   "netG": {
     "net_type": "uniwin",
-    "upscale": 3, // 2 | 3 | 4 | 8
+    "upscale": 4, // 2 | 3 | 4 | 8
     "in_chans": 3,
     "img_size": 64, // LR patch size is set to 64
     "window_size": 16,
