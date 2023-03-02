@@ -244,30 +244,18 @@ class Trainer:
                         epoch, self.current_step, avg_psnr, avg_psnr_y))
 
 
-# def main(opt: str):
-#     """
-#     Args:
-#         rank: Unique identifier of each process
-#         world_size: Total number of processes
-#         opt: training configuration json file path
-#     """
-    
-#     # init_process_group(backend="nccl")
-    
-#     # destroy_process_group()
-def ddp_setup():
-    world_size = torch.cuda.device_count()
-    torch.cuda.set_device(int(os.environ['RANK']) % world_size)
-    init_process_group(backend='nccl')
-
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--opt', type=str, help='Training configuraion json file path')
 
     
+    # DDP(DistributedDataParallel) setup
+    world_size = torch.cuda.device_count()
+    torch.cuda.set_device(int(os.environ['RANK']) % world_size)
+    init_process_group(backend='nccl')
 
     trainer = Trainer(parser.parse_args().opt)
     trainer.train()
-
+    
     destroy_process_group()
