@@ -32,8 +32,6 @@ class Trainer:
         self.local_rank = int(os.environ['LOCAL_RANK'])
         self.global_rank = int(os.environ['RANK'])
 
-        
-
         self.opt = self.init_opt(opt)
         self.init_logger()
         self.init_seed()
@@ -86,7 +84,7 @@ class Trainer:
 
 
     def init_logger(self, logger_name='train'):
-        if self.global_rank == 0:
+        if self.local_rank == 0:
             utils_logger.logger_info(logger_name, os.path.join(
                 self.opt['path']['log'], logger_name+'.log'))
             self.logger = logging.getLogger(logger_name)
@@ -155,15 +153,15 @@ class Trainer:
 
 
     def print_arch(self, depth=5):
-        if self.global_rank == 0:
+        if self.local_rank == 0:
             summary(self.model.netG, depth=depth)
 
 
     def train(self):
         
-        start_epoch = self.current_step // self.train_size
+        epochs_run = self.current_step // self.train_size
 
-        for epoch in range(start_epoch, start_epoch + 1000000):
+        for epoch in range(epochs_run, epochs_run + 1000000):
             
             self.train_sampler.set_epoch(epoch)
 
@@ -175,7 +173,7 @@ class Trainer:
                 self.model.optimize_parameters(self.current_step)
 
                 # print training information
-                if self.current_step % self.opt['train']['checkpoint_print'] == 0 and self.global_rank == 0:
+                if self.current_step % self.opt['train']['checkpoint_print'] == 0 and self.local_rank == 0:
                     logs = self.model.current_log()  # such as loss
                     message = '<epoch:{:3d}, iter:{:8,d}, lr:{:.3e}> '.format(
                         epoch, self.current_step, self.model.current_learning_rate())
@@ -184,7 +182,7 @@ class Trainer:
                     self.logger.info(message)
 
                 # save model
-                if self.current_step % self.opt['train']['checkpoint_save'] == 0 and self.global_rank == 0:
+                if self.current_step % self.opt['train']['checkpoint_save'] == 0 and self.local_rank == 0:
                     self.logger.info('Saving the model.')
                     self.model.save(self.current_step)
 
