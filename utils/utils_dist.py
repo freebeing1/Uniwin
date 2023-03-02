@@ -24,17 +24,22 @@ def init_dist(launcher, backend='nccl', **kwargs):
 
 
 def _init_dist_pytorch_multi(backend, **kwargs):
-    for key, value in kwargs.items():
-        if key == 'world_size':
-            world_size = value
+    # for key, value in kwargs.items():
+    #     if key == 'world_size':
+    #         world_size = value
     rank = int(os.environ['RANK'])
     num_gpus = torch.cuda.device_count()
+    print('#'*300)
+    print(f'rank {rank}')
+    print(f'num_gpus {num_gpus}')
+    print('#'*300)
     torch.cuda.set_device(rank % num_gpus)
     dist.init_process_group(
         backend=backend, 
-        init_method='tcp://166.104.112.198:29500', 
-        rank=rank, 
-        world_size=world_size
+        init_method='tcp://166.104.112.198',
+        # rank=rank,
+        # world_size=world_size,
+        **kwargs
     )
 
 

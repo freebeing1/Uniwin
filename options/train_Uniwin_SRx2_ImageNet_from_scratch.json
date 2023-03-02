@@ -18,7 +18,7 @@
   "datasets": {
     "train": {
       "name": "ImageNet",
-      "type": "ImageNetPairedDataset", // ImageNetPairedDataset | PairedImageDataset
+      "type": "ImageNetPairedSRDataset", // ImageNetPairedSRDataset | PairedSRDataset
       "meta_info_file": "trainsets/ImageNet/ImageNet_HR.lmdb/meta_info.txt",
       "io_backend": {
         "type": "lmdb" // read training images from lmdb
@@ -31,7 +31,7 @@
       "use_rot": true, // we use random 90|180|270 rotation for data augmentation
       "dataloader_shuffle": true,
       "dataloader_num_workers": 32,
-      "dataloader_batch_size": 32 // batch size 32. Total batch size =4x8=32 in Uniwin
+      "dataloader_batch_size": 16 // batch size 32. Total batch size =4x8=32 in Uniwin
     },
     "test": {
       "name": "Set5",

@@ -151,6 +151,7 @@ def main(json_path='options/swinir_lmdb.json'):
     model.init_train()
     
     if opt['rank'] == 0:
+        print(type(model.netG))
         summary(model.netG, depth=5)
 
 

@@ -12,10 +12,10 @@ from basicsr.utils.registry import DATASET_REGISTRY
 
 
 @DATASET_REGISTRY.register()
-class ImageNetPairedDataset(data.Dataset):
+class ImageNetPairedSRDataset(data.Dataset):
     
     def __init__(self, opt):
-        super(ImageNetPairedDataset, self).__init__()
+        super(ImageNetPairedSRDataset, self).__init__()
         self.opt = opt
         # file client (io backend)
         self.file_client = None

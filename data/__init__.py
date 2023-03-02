@@ -3,7 +3,7 @@ import importlib
 from copy import deepcopy
 from basicsr.utils.registry import DATASET_REGISTRY
 from basicsr.utils import scandir, get_root_logger
-# from utils.utils_video import scandir
+
 
 __all__=['build_dataset']
 

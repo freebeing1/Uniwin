@@ -18,7 +18,7 @@
   "datasets": {
     "train": {
       "name": "DF2K",
-      "type": "PairedImageDataset", // ImageNetPairedDataset | PairedImageDataset
+      "type": "PairedSRDataset", // ImageNetPairedSRDataset | PairedSRDataset
       "meta_info_file": "trainsets/DF2K/DF2K_HR_sub.lmdb/meta_info.txt",
       "io_backend": {
         "type": "lmdb" // read training images from lmdb
@@ -36,7 +36,7 @@
     },
     "test": {
       "name": "Set5",
-      "type": "PairedImageDataset", // ImageNetPairedDataset | PairedImageDataset
+      "type": "PairedSRDataset", // ImageNetPairedSRDataset | PairedSRDataset
       "io_backend": {
         "type": "disk" // read testing images from disk
       },

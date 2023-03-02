@@ -18,7 +18,7 @@
   "datasets": {
     "train": {
       "name": "ImageNet",
-      "type": "ImageNetPairedDataset", // ImageNetPairedDataset | PairedImageDataset
+      "type": "ImageNetPairedSRDataset", // ImageNetPairedSRDataset | PairedSRDataset
       "meta_info_file": "trainsets/ImageNet/ImageNet_HR.lmdb/meta_info.txt",
       "io_backend": {
         "type": "lmdb" // read training images from lmdb
@@ -35,7 +35,7 @@
     },
     "test": {
       "name": "Set5",
-      "type": "PairedImageDataset", // ImageNetPairedDataset | PairedImageDataset
+      "type": "PairedSRDataset", // ImageNetPairedSRDataset | PairedSRDataset
       "io_backend": {
         "type": "disk" // read testing images from disk
       },

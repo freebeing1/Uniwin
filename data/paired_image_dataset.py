@@ -8,7 +8,7 @@ from basicsr.utils.registry import DATASET_REGISTRY
 
 
 @DATASET_REGISTRY.register()
-class PairedImageDataset(data.Dataset):
+class PairedSRDataset(data.Dataset):
     """Paired image dataset for image restoration.
 
     Read LQ (Low Quality, e.g. LR (Low Resolution), blurry, noisy, etc) and GT image pairs.
@@ -36,7 +36,7 @@ class PairedImageDataset(data.Dataset):
     """
 
     def __init__(self, opt):
-        super(PairedImageDataset, self).__init__()
+        super(PairedSRDataset, self).__init__()
         self.opt = opt
         # file client (io backend)
         self.file_client = None

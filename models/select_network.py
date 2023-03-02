@@ -14,119 +14,8 @@ from torchinfo import summary
 def define_G(opt):
     opt_net = opt['netG']
     net_type = opt_net['net_type']
-    # ----------------------------------------
-    # MySR 
-    # ----------------------------------------
-    if net_type == 'dense2sparse':
-        from networks.network_swinir_dense2sparse import SwinIR as net
-        netG = net(
-            img_size=opt_net['img_size'],
-            in_chans=opt_net['in_chans'],
-            embed_dim=opt_net['embed_dim'],
-            depths = opt_net['depths'],
-            num_heads=opt_net['num_heads'],
-            window_size=opt_net['window_size'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upscale=opt_net['upscale'],
-            img_range=opt_net['img_range'],
-            upsampler=opt_net['upsampler'],
-            resi_connection = opt_net['resi_connection'],
-            global_partition= opt_net['global_partition']
-        )
-    elif net_type == 'dense2sparse_srpb':
-        from networks.network_swinir_dense2sparse_srpb import SwinIR as net
-        netG = net(
-            img_size=opt_net['img_size'],
-            in_chans=opt_net['in_chans'],
-            embed_dim=opt_net['embed_dim'],
-            depths = opt_net['depths'],
-            num_heads=opt_net['num_heads'],
-            window_size=opt_net['window_size'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upscale=opt_net['upscale'],
-            img_range=opt_net['img_range'],
-            upsampler=opt_net['upsampler'],
-            resi_connection = opt_net['resi_connection'],
-            global_partition= opt_net['global_partition']
-        )
-    elif net_type == 'dense2sparse_no_pos':
-        from networks.network_swinir_dense2sparse_no_pos import SwinIR as net
-        netG = net(
-            img_size=opt_net['img_size'],
-            in_chans=opt_net['in_chans'],
-            embed_dim=opt_net['embed_dim'],
-            depths = opt_net['depths'],
-            num_heads=opt_net['num_heads'],
-            window_size=opt_net['window_size'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upscale=opt_net['upscale'],
-            img_range=opt_net['img_range'],
-            upsampler=opt_net['upsampler'],
-            resi_connection = opt_net['resi_connection'],
-            global_partition= opt_net['global_partition']
-        )
-    elif net_type == 'swinir':
-        from networks.network_swinir import SwinIR as net
-        netG = net(
-            upscale=opt_net['upscale'],
-            in_chans=opt_net['in_chans'],
-            img_size=opt_net['img_size'],
-            window_size=opt_net['window_size'],
-            img_range=opt_net['img_range'],
-            depths=opt_net['depths'],
-            embed_dim=opt_net['embed_dim'],
-            num_heads=opt_net['num_heads'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upsampler=opt_net['upsampler'],
-            resi_connection=opt_net['resi_connection']
-        )
-    elif net_type == 'dense2sparse_attnmask':
-        from networks.network_dense2sparse_attnmask import SwinIR as net
-        netG = net(
-            img_size=opt_net['img_size'],
-            in_chans=opt_net['in_chans'],
-            embed_dim=opt_net['embed_dim'],
-            depths=opt_net['depths'],
-            num_heads=opt_net['num_heads'],
-            window_size=opt_net['window_size'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upscale=opt_net['upscale'],
-            img_range=opt_net['img_range'],
-            upsampler=opt_net['upsampler'],
-            resi_connection=opt_net['resi_connection'],
-            global_partition=opt_net['global_partition']
-        )
-    elif net_type == 'natsr':
-        from networks.network_nat import NATSR as net
-        netG = net(
-            upscale=opt_net['upscale'],
-            in_chans=opt_net['in_chans'],
-            embed_dim=opt_net['embed_dim'],
-            kernel_size=opt_net['kernel_size'],
-            img_range=opt_net['img_range'],
-            depths=opt_net['depths'],
-            num_heads=opt_net['num_heads'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            resi_connection=opt_net['resi_connection'],
-            layer_scale=opt_net['layer_scale'],
-            dilations=None
-        )
-    elif net_type == 'dinatsr':
-        from networks.network_nat import NATSR as net
-        netG = net(
-            upscale=opt_net['upscale'],
-            in_chans=opt_net['in_chans'],
-            embed_dim=opt_net['embed_dim'],
-            kernel_size=opt_net['kernel_size'],
-            img_range=opt_net['img_range'],
-            depths=opt_net['depths'],
-            num_heads=opt_net['num_heads'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            resi_connection=opt_net['resi_connection'],
-            layer_scale=opt_net['layer_scale'],
-            dilations=opt_net['dilations']
-        )
-    elif net_type == 'uniwin':
+    
+    if net_type == 'uniwin':
         from networks.network_uniwin import Uniwin as net
         netG = net(
             upscale=opt_net['upscale'],
@@ -143,58 +32,10 @@ def define_G(opt):
             resi_connection=opt_net['resi_connection'],
             layer_scale=opt_net['layer_scale']
         )
-    elif net_type == 'swinir_nat_2':
-        from networks.network_swinir_nat_2 import SwinIR_NAT as net
-        netG = net(
-            upscale=opt_net['upscale'],
-            in_chans=opt_net['in_chans'],
-            img_size=opt_net['img_size'],
-            window_size=opt_net['window_size'],
-            kernel_size=opt_net['kernel_size'],
-            img_range=opt_net['img_range'],
-            depths=opt_net['depths'],
-            embed_dim=opt_net['embed_dim'],
-            num_heads=opt_net['num_heads'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upsampler=opt_net['upsampler'],
-            resi_connection=opt_net['resi_connection'],
-            layer_scale=opt_net['layer_scale']
-        )
-    elif net_type == 'd2s_nat':
-        from networks.network_d2s_nat import D2S_NAT as net
-        netG = net(
-            upscale=opt_net['upscale'],
-            in_chans=opt_net['in_chans'],
-            img_size=opt_net['img_size'],
-            window_size=opt_net['window_size'],
-            kernel_size=opt_net['kernel_size'],
-            img_range=opt_net['img_range'],
-            depths=opt_net['depths'],
-            global_partition=opt_net['global_partition'],
-            embed_dim=opt_net['embed_dim'],
-            num_heads=opt_net['num_heads'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upsampler=opt_net['upsampler'],
-            resi_connection=opt_net['resi_connection'],
-            layer_scale=opt_net['layer_scale']
-        )
+    
     else:
         raise NotImplementedError(f'net type [{net_type}] not implemented')
-        # netG = net(upscale=opt_net['upscale'],
-        #             in_chans=opt_net['in_chans'],
-        #             img_range=opt_net['img_range'],
-        #             img_size=opt_net['img_size'],
-        #             window_size=opt_net['window_size'],
-        #             token_size=opt_net['token_size'],
-        #             num_feat=opt_net['num_feat'],
-        #             num_layers=opt_net['num_layers'],
-        #             num_heads=opt_net['num_heads'],
-        #             num_resblocks=opt_net['num_resblocks'],
-        #             expansion_ratio=opt_net['expansion_ratio'],
-        #             mlp_ratio=opt_net['mlp_ratio'])
-    # if opt['rank'] == 0:
-    #     summary(netG, depth =5)
-    
+        
     # ----------------------------------------
     # initialize weights
     # ----------------------------------------
