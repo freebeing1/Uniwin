@@ -1,5 +1,5 @@
 {
-  "task": "train_Uniwin_SRx2_ImageNet_from_scratch",
+  "task": "train_Uniwin_SRx4_ImageNet_from_scratch",
   "model": "plain",
   "gpu_ids": [
     0,
@@ -8,7 +8,7 @@
     3
   ],
   "dist": true,
-  "scale": 2, // 2 | 3 | 4 | 8
+  "scale": 4, // 2 | 3 | 4 | 8
   "n_channels": 3, // broadcast to "datasets", 1 for grayscale, 3 for color
   "path": {
     "root": "superresolution",
@@ -23,15 +23,15 @@
       "io_backend": {
         "type": "lmdb" // read training images from lmdb
       },
-      "scale": 2,
+      "scale": 4,
       "dataset_type": "sr",
       "dataroot_H": "trainsets/ImageNet/ImageNet_HR.lmdb", // path of H training dataset.
-      "H_size": 128, // 128|192|256|512. LR patch size is set to 64
+      "H_size": 256, // 128|192|256|512. LR patch size is set to 64
       "use_hflip": true, // we use random horizontal flip for data augmentation
       "use_rot": true, // we use random 90|180|270 rotation for data augmentation
       "dataloader_shuffle": true,
       "dataloader_num_workers": 32,
-      "dataloader_batch_size": 16 // batch size 32. Total batch size =4x8=32 in Uniwin
+      "dataloader_batch_size": 32 // batch size 32. Total batch size =4x8=32 in Uniwin
     },
     "test": {
       "name": "Set5",
@@ -39,15 +39,15 @@
       "io_backend": {
         "type": "disk" // read testing images from disk
       },
-      "filename_tmpl": "{}x2", // template of file names of test images (ex) babyx2.png
+      "filename_tmpl": "{}x4", // template of file names of test images (ex) babyx2.png
       "dataset_type": "sr",
       "dataroot_H": "testsets/Set5/HR", // path of H testing dataset
-      "dataroot_L": "testsets/Set5/LR_bicubic/X2" // path of L testing dataset
+      "dataroot_L": "testsets/Set5/LR_bicubic/X4" // path of L testing dataset
     }
   },
   "netG": {
     "net_type": "uniwin",
-    "upscale": 2, // 2 | 3 | 4 | 8
+    "upscale": 4, // 2 | 3 | 4 | 8
     "in_chans": 3,
     "img_size": 64, // LR patch size is set 64
     "window_size": 16,
@@ -92,7 +92,8 @@
       500000,
       650000,
       700000,
-      750000
+      750000,
+      800000
     ], // total iteration: 800000
     "G_scheduler_gamma": 0.5,
     "G_regularizer_orthstep": null, // unused

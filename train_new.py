@@ -30,7 +30,7 @@ class Trainer:
     ) -> None:
 
         self.local_rank = int(os.environ['LOCAL_RANK'])
-        self.global_rank = int(os.environ['RANK'])
+        # self.global_rank = int(os.environ['RANK'])
 
         self.opt = self.init_opt(opt)
         self.init_logger()
@@ -60,7 +60,7 @@ class Trainer:
 
     def init_checkpoint_path(self, opt):
 
-        if self.global_rank == 0:
+        if self.local_rank == 0:
             util.mkdirs((path for key, path in opt['path'].items() if 'pretrained' not in key))
 
 
@@ -77,7 +77,7 @@ class Trainer:
         opt['path']['pretrained_optimizerG'] = init_path_optimizerG
 
         # save opt to  a '../option.json' file
-        if self.global_rank == 0:
+        if self.local_rank == 0:
             option.save(opt)
 
         return max(init_iter_G, init_iter_E, init_iter_optimizerG)
@@ -96,7 +96,7 @@ class Trainer:
         seed = self.opt['train']['manual_seed']
         if seed is None:
             seed = random.randint(1, 10000)
-        if self.opt['global_rank'] == 0:
+        if self.opt['local_rank'] == 0:
             self.logger.info(f'Random seed: {seed}')
         random.seed(seed)
         np.random.seed(seed)
@@ -117,7 +117,7 @@ class Trainer:
 
                 self.train_size = int(math.ceil(self.n_train_images / dataset_opt['dataloader_batch_size']))
                 
-                if self.global_rank == 0:
+                if self.local_rank == 0:
                     self.logger.info('Number of train images: {:,d}, iters: {:,d}'.format(
                         self.n_train_images, self.train_size))
                 
@@ -162,7 +162,7 @@ class Trainer:
         epochs_run = self.current_step // self.train_size
 
         for epoch in range(epochs_run, epochs_run + 1000000):
-            
+
             self.train_sampler.set_epoch(epoch)
 
             for i, train_data in enumerate(self.train_loader):
@@ -187,7 +187,7 @@ class Trainer:
                     self.model.save(self.current_step)
 
                 # testing
-                if self.current_step % self.opt['train']['checkpoint_test'] == 0 and self.global_rank == 0:
+                if self.current_step % self.opt['train']['checkpoint_test'] == 0 and self.local_rank == 0:
 
                     avg_psnr = 0.0
                     avg_psnr_y = 0.0
@@ -240,6 +240,11 @@ class Trainer:
                     # testing log
                     self.logger.info('<epoch:{:3d}, iter:{:8,d}, Average PSNR : {:<.2f}dB, Average PSNR_Y : {:<.2f}dB'.format(
                         epoch, self.current_step, avg_psnr, avg_psnr_y))
+            
+            if self.current_step == self.opt['train']['G_scheduler_milestones'][-1]:
+                if self.local_rank == 0:
+                    self.logger.info(f'Total iteration: {self.current_step}')
+                break
 
 
 if __name__ == '__main__':
@@ -247,10 +252,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--opt', type=str, help='Training configuraion json file path')
 
-    
     # DDP(DistributedDataParallel) setup
-    world_size = torch.cuda.device_count()
-    torch.cuda.set_device(int(os.environ['RANK']) % world_size)
+    torch.cuda.set_device(int(os.environ['LOCAL_RANK']))
     init_process_group(backend='nccl')
 
     trainer = Trainer(parser.parse_args().opt)

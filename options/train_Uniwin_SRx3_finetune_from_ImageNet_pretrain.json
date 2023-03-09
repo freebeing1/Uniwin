@@ -92,7 +92,8 @@
       125000,
       200000,
       225000,
-      240000
+      240000,
+      250000
     ], // total iteration : 250000
     "G_scheduler_gamma": 0.5,
     "G_regularizer_orthstep": null, // unused
