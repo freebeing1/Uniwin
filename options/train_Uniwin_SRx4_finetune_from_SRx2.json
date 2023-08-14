@@ -98,7 +98,7 @@
     "G_scheduler_gamma": 0.5,
     "G_regularizer_orthstep": null, // unused
     "G_regularizer_clipstep": null, // unused
-    "G_param_strict": true,
+    "G_param_strict": false,
     "E_param_strict": true,
     "checkpoint_test": 5000, // for testing
     "checkpoint_save": 5000, // for saving model
