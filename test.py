@@ -6,7 +6,6 @@ from collections import OrderedDict
 import os
 import torch
 import csv
-import requests
 import argparse
 import lpips
 
@@ -144,204 +143,29 @@ def define_model(opt):
     
     if net_type == 'uniwin':
         from networks.network_uniwin import Uniwin as net
-        model = net(
-            upscale=opt_net['upscale'],
-            in_chans=opt_net['in_chans'],
-            img_size=opt_net['img_size'],
-            window_size=opt_net['window_size'],
-            kernel_size=opt_net['kernel_size'],
-            img_range=opt_net['img_range'],
-            depths=opt_net['depths'],
-            embed_dim=opt_net['embed_dim'],
-            num_heads=opt_net['num_heads'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upsampler=opt_net['upsampler'],
-            resi_connection=opt_net['resi_connection'],
-            layer_scale=opt_net['layer_scale']
-        )
-
-        param_key_g = 'params'
-        pretrained_model = torch.load(opt['model_path'])
-        model.load_state_dict(pretrained_model[param_key_g] if param_key_g in pretrained_model.keys() else pretrained_model, strict=True)
-    
-    elif net_type == 'uniwin_natl_1_stl_2':
-        from networks.network_uniwin_natl_1_stl_2 import Uniwin as net
-        model = net(
-            upscale=opt_net['upscale'],
-            in_chans=opt_net['in_chans'],
-            img_size=opt_net['img_size'],
-            window_size=opt_net['window_size'],
-            kernel_size=opt_net['kernel_size'],
-            img_range=opt_net['img_range'],
-            depths=opt_net['depths'],
-            embed_dim=opt_net['embed_dim'],
-            num_heads=opt_net['num_heads'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upsampler=opt_net['upsampler'],
-            resi_connection=opt_net['resi_connection'],
-            layer_scale=opt_net['layer_scale']
-        )
-        param_key_g = 'params'
-        pretrained_model = torch.load(opt['model_path'])
-        model.load_state_dict(pretrained_model[param_key_g] if param_key_g in pretrained_model.keys() else pretrained_model, strict=True)
-
-    elif net_type == 'uniwin_natl_first':
-        from networks.network_uniwin_natl_first import Uniwin as net
-        model = net(
-            upscale=opt_net['upscale'],
-            in_chans=opt_net['in_chans'],
-            img_size=opt_net['img_size'],
-            window_size=opt_net['window_size'],
-            kernel_size=opt_net['kernel_size'],
-            img_range=opt_net['img_range'],
-            depths=opt_net['depths'],
-            embed_dim=opt_net['embed_dim'],
-            num_heads=opt_net['num_heads'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upsampler=opt_net['upsampler'],
-            resi_connection=opt_net['resi_connection'],
-            layer_scale=opt_net['layer_scale']
-        )
-
-        param_key_g = 'params'
-        pretrained_model = torch.load(opt['model_path'])
-        model.load_state_dict(pretrained_model[param_key_g] if param_key_g in pretrained_model.keys() else pretrained_model, strict=True)
-        
-    elif net_type == 'uniwin_natl_first_2':
-        from networks.network_uniwin_natl_first_2 import Uniwin as net
-        model = net(
-            upscale=opt_net['upscale'],
-            in_chans=opt_net['in_chans'],
-            img_size=opt_net['img_size'],
-            window_size=opt_net['window_size'],
-            kernel_size=opt_net['kernel_size'],
-            img_range=opt_net['img_range'],
-            depths=opt_net['depths'],
-            embed_dim=opt_net['embed_dim'],
-            num_heads=opt_net['num_heads'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upsampler=opt_net['upsampler'],
-            resi_connection=opt_net['resi_connection'],
-            layer_scale=opt_net['layer_scale']
-        )
-
-        param_key_g = 'params'
-        pretrained_model = torch.load(opt['model_path'])
-        model.load_state_dict(pretrained_model[param_key_g] if param_key_g in pretrained_model.keys() else pretrained_model, strict=True)
-
-    elif net_type == 'uniwin_natl_1_stl_4_natl_1':
-        from networks.network_uniwin_natl_1_stl_4_natl_1 import Uniwin as net
-        model = net(
-            upscale=opt_net['upscale'],
-            in_chans=opt_net['in_chans'],
-            img_size=opt_net['img_size'],
-            window_size=opt_net['window_size'],
-            kernel_size=opt_net['kernel_size'],
-            img_range=opt_net['img_range'],
-            depths=opt_net['depths'],
-            embed_dim=opt_net['embed_dim'],
-            num_heads=opt_net['num_heads'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upsampler=opt_net['upsampler'],
-            resi_connection=opt_net['resi_connection'],
-            layer_scale=opt_net['layer_scale']
-        )
-
-        param_key_g = 'params'
-        pretrained_model = torch.load(opt['model_path'])
-        model.load_state_dict(pretrained_model[param_key_g] if param_key_g in pretrained_model.keys() else pretrained_model, strict=True)
-
-
-    elif net_type == 'uniwin_natl_first_4':
-        from networks.network_uniwin_natl_first_4 import Uniwin as net
-        model = net(
-            upscale=opt_net['upscale'],
-            in_chans=opt_net['in_chans'],
-            img_size=opt_net['img_size'],
-            window_size=opt_net['window_size'],
-            kernel_size=opt_net['kernel_size'],
-            img_range=opt_net['img_range'],
-            depths=opt_net['depths'],
-            embed_dim=opt_net['embed_dim'],
-            num_heads=opt_net['num_heads'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upsampler=opt_net['upsampler'],
-            resi_connection=opt_net['resi_connection'],
-            layer_scale=opt_net['layer_scale']
-        )
-
-        param_key_g = 'params'
-        pretrained_model = torch.load(opt['model_path'])
-        model.load_state_dict(pretrained_model[param_key_g] if param_key_g in pretrained_model.keys() else pretrained_model, strict=True)
-
-
-    elif net_type == 'uniwin_natl_first_6':
-        from networks.network_uniwin_natl_first_6 import Uniwin as net
-        model = net(
-            upscale=opt_net['upscale'],
-            in_chans=opt_net['in_chans'],
-            img_size=opt_net['img_size'],
-            window_size=opt_net['window_size'],
-            kernel_size=opt_net['kernel_size'],
-            img_range=opt_net['img_range'],
-            depths=opt_net['depths'],
-            embed_dim=opt_net['embed_dim'],
-            num_heads=opt_net['num_heads'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upsampler=opt_net['upsampler'],
-            resi_connection=opt_net['resi_connection'],
-            layer_scale=opt_net['layer_scale']
-        )
-
-        param_key_g = 'params'
-        pretrained_model = torch.load(opt['model_path'])
-        model.load_state_dict(pretrained_model[param_key_g] if param_key_g in pretrained_model.keys() else pretrained_model, strict=True)
-
-    elif net_type == 'uniwin_2stage':
-        from networks.network_uniwin_2stage import Uniwin as net
-        model = net(
-            upscale=opt_net['upscale'],
-            in_chans=opt_net['in_chans'],
-            img_size=opt_net['img_size'],
-            window_size=opt_net['window_size'],
-            kernel_size=opt_net['kernel_size'],
-            img_range=opt_net['img_range'],
-            depths=opt_net['depths'],
-            embed_dim=opt_net['embed_dim'],
-            num_heads=opt_net['num_heads'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upsampler=opt_net['upsampler'],
-            resi_connection=opt_net['resi_connection'],
-            layer_scale=opt_net['layer_scale']
-        )
-
-        param_key_g = 'params'
-        pretrained_model = torch.load(opt['model_path'])
-        model.load_state_dict(pretrained_model[param_key_g] if param_key_g in pretrained_model.keys() else pretrained_model, strict=True)
-
-    elif net_type == 'swinir':
-        from networks.network_swinir import SwinIR as net
-        model = net(
-            upscale=opt_net['upscale'],
-            in_chans=opt_net['in_chans'],
-            img_size=opt_net['img_size'],
-            window_size=opt_net['window_size'],
-            # kernel_size=opt_net['kernel_size'],
-            img_range=opt_net['img_range'],
-            depths=opt_net['depths'],
-            embed_dim=opt_net['embed_dim'],
-            num_heads=opt_net['num_heads'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upsampler=opt_net['upsampler'],
-            resi_connection=opt_net['resi_connection'],
-            layer_scale=opt_net['layer_scale']
-        )
-        param_key_g = 'params'
-        pretrained_model = torch.load(opt['model_path'])
-        model.load_state_dict(pretrained_model[param_key_g] if param_key_g in pretrained_model.keys() else pretrained_model, strict=True)
 
     else:
         raise NotImplementedError(f'{net_type} not implemented')
+
+    model = net(
+        upscale=opt_net['upscale'],
+        in_chans=opt_net['in_chans'],
+        img_size=opt_net['img_size'],
+        window_size=opt_net['window_size'],
+        kernel_size=opt_net['kernel_size'],
+        img_range=opt_net['img_range'],
+        depths=opt_net['depths'],
+        embed_dim=opt_net['embed_dim'],
+        num_heads=opt_net['num_heads'],
+        mlp_ratio=opt_net['mlp_ratio'],
+        upsampler=opt_net['upsampler'],
+        resi_connection=opt_net['resi_connection'],
+        layer_scale=opt_net['layer_scale']
+    )
+
+    param_key_g = 'params'
+    pretrained_model = torch.load(opt['model_path'])
+    model.load_state_dict(pretrained_model[param_key_g] if param_key_g in pretrained_model.keys() else pretrained_model, strict=True)
 
     return model
 
@@ -455,15 +279,14 @@ def test(args):
 
 
 if __name__ == '__main__':
-    test_opt_list = ['train_Uniwin_SRx2_ablation_NATL_1_STL_4_NATL_1']
+    test_opt_list = ['train_Uniwin_SRx2_DF2K']
     test_benchmark_list = ['Set5', 'Set14', 'BSDS100', 'urban100', 'manga109']
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--opt', type=str, default=None)
     parser.add_argument('--ema', action='store_true')
     parser.add_argument('--tile', type=int, default=None)
-    parser.add_argument('--benchmarks', type=str,
-                        default=test_benchmark_list)
+    parser.add_argument('--benchmarks', type=str, default=test_benchmark_list)
     parser.add_argument('--unit_iter', type=int, default=500000)
     parser.add_argument('--max_iter', type=int, default=500000)
     args = parser.parse_args()
