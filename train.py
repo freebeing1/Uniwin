@@ -30,7 +30,6 @@ class Trainer:
     ) -> None:
 
         self.local_rank = int(os.environ['LOCAL_RANK'])
-        # self.global_rank = int(os.environ['RANK'])
 
         self.opt = self.init_opt(opt)
         self.init_logger()
