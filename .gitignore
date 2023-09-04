@@ -8,25 +8,7 @@ __pycache__/
 *.so
 
 benchmark-results/
-cka/
-LAM_test_images/
-mean_attn_distance/
-ModelZoo/
 results/
-results_LAM/
-SaliencyModel/
 superresolution/
 testsets/
 trainsets/
-
-
-*.png
-*.json
-*.sh
-temp.*
-create_lmdb.py
-extract_subimages.py
-iterate_dataset.py
-mean_attention_distance.py
-visualize_by_LAM.py
-visualize_cka.py
