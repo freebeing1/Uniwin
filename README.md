@@ -48,7 +48,7 @@ pip3 install -r requirements.txt
 ```
 
 ## Preparation
-- Download training dataset (DF2K/ImageNet)
+- Download train dataset (DF2K/ImageNet)
 - Download test dataset (Set5/Set14/BSD100/Urban100/Manga109)
 
 ## Training
