@@ -55,12 +55,12 @@
     "kernel_size": 9, // 7 | 9 | 11
     "img_range": 1.0,
     "depths": [
-      6,
-      6,
-      6,
-      6,
-      6,
-      6
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
     ],
     "embed_dim": 180,
     "layer_scale": 1e-5,
