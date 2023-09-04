@@ -31,7 +31,7 @@ class Mlp(nn.Module):
         x = self.drop(x)
         return x
 
-class SlidingWindowAttention(nn.module):
+class SlidingWindowAttention(nn.Module):
     def __init__(self, 
                  dim, 
                  kernel_size, 
@@ -70,10 +70,10 @@ class SlidingWindowAttention(nn.module):
         qkv = self.qkv(x).reshape(B, H, W, 3, self.num_heads, self.head_dim).permute(3, 0, 4, 1, 2, 5)
         q, k, v = qkv[0], qkv[1], qkv[2]
         q = q * self.scale
-        attn = natten2dqkrpb(q, k, self.rpb, None)
+        attn = natten2dqkrpb(q, k, self.rpb, 1)
         attn = attn.softmax(dim=-1)
         attn = self.attn_drop(attn)
-        x = natten2dav(attn, v, None)
+        x = natten2dav(attn, v, 1)
         x = x.permute(0, 2, 3, 1, 4).reshape(B, H, W, C)
         if pad_r or pad_b:
             x = x[:, :Hp, :Wp, :]
@@ -539,7 +539,11 @@ class UniwinAttentionLayer(nn.Module):
                     act_layer=nn.GELU,
                     norm_layer=norm_layer,
                     layer_scale=layer_scale,
-                ),
+                )
+            ]
+        )
+        for i in range(2):
+            self.layers.append(
                 WALayer(
                     dim=dim, 
                     input_resolution=input_resolution, 
@@ -553,10 +557,9 @@ class UniwinAttentionLayer(nn.Module):
                     attn_drop=attn_drop,
                     drop_path=drop_path[i] if isinstance(drop_path, list) else drop_path,
                     norm_layer=norm_layer
-                ) for i in range(2)
-            ]
-        )
-
+                )
+            )
+        
 
     def forward(self, x, x_size):
         for layer in self.layers:
@@ -615,7 +618,7 @@ class BasicLayer(nn.Module):
         self.use_checkpoint = use_checkpoint
 
         # build blocks
-        self.blocks = nn.ModuleLiat(
+        self.blocks = nn.ModuleList(
             [
                 UniwinAttentionLayer(
                     dim=dim,
