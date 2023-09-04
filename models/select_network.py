@@ -17,223 +17,26 @@ def define_G(opt):
     
     if net_type == 'uniwin':
         from networks.network_uniwin import Uniwin as net
-        netG = net(
-            upscale=opt_net['upscale'],
-            in_chans=opt_net['in_chans'],
-            img_size=opt_net['img_size'],
-            window_size=opt_net['window_size'],
-            kernel_size=opt_net['kernel_size'],
-            img_range=opt_net['img_range'],
-            depths=opt_net['depths'],
-            embed_dim=opt_net['embed_dim'],
-            num_heads=opt_net['num_heads'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upsampler=opt_net['upsampler'],
-            resi_connection=opt_net['resi_connection'],
-            layer_scale=opt_net['layer_scale']
-        )
-    
-    elif net_type == 'uniwin_sasa':
-        from networks.network_uniwin_sasa import Uniwin as net
-        netG = net(
-            upscale=opt_net['upscale'],
-            in_chans=opt_net['in_chans'],
-            img_size=opt_net['img_size'],
-            window_size=opt_net['window_size'],
-            kernel_size=opt_net['kernel_size'],
-            img_range=opt_net['img_range'],
-            depths=opt_net['depths'],
-            embed_dim=opt_net['embed_dim'],
-            num_heads=opt_net['num_heads'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upsampler=opt_net['upsampler'],
-            resi_connection=opt_net['resi_connection'],
-            layer_scale=opt_net['layer_scale']
-        )
-
-    elif net_type == 'uniwin_2stage':
-        from networks.network_uniwin_2stage import Uniwin as net
-        netG = net(
-            upscale=opt_net['upscale'],
-            in_chans=opt_net['in_chans'],
-            img_size=opt_net['img_size'],
-            window_size=opt_net['window_size'],
-            kernel_size=opt_net['kernel_size'],
-            img_range=opt_net['img_range'],
-            depths=opt_net['depths'],
-            embed_dim=opt_net['embed_dim'],
-            num_heads=opt_net['num_heads'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upsampler=opt_net['upsampler'],
-            resi_connection=opt_net['resi_connection'],
-            layer_scale=opt_net['layer_scale']
-        )
-
-    elif net_type == 'uniwin_natl_first':
-        from networks.network_uniwin_natl_first import Uniwin as net
-        netG = net(
-            upscale=opt_net['upscale'],
-            in_chans=opt_net['in_chans'],
-            img_size=opt_net['img_size'],
-            window_size=opt_net['window_size'],
-            kernel_size=opt_net['kernel_size'],
-            img_range=opt_net['img_range'],
-            depths=opt_net['depths'],
-            embed_dim=opt_net['embed_dim'],
-            num_heads=opt_net['num_heads'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upsampler=opt_net['upsampler'],
-            resi_connection=opt_net['resi_connection'],
-            layer_scale=opt_net['layer_scale']
-        )
-
-    elif net_type == 'uniwin_natl_1_stl_2':
-        from networks.network_uniwin_natl_1_stl_2 import Uniwin as net
-        netG = net(
-            upscale=opt_net['upscale'],
-            in_chans=opt_net['in_chans'],
-            img_size=opt_net['img_size'],
-            window_size=opt_net['window_size'],
-            kernel_size=opt_net['kernel_size'],
-            img_range=opt_net['img_range'],
-            depths=opt_net['depths'],
-            embed_dim=opt_net['embed_dim'],
-            num_heads=opt_net['num_heads'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upsampler=opt_net['upsampler'],
-            resi_connection=opt_net['resi_connection'],
-            layer_scale=opt_net['layer_scale']
-        )
-
-    elif net_type == 'uniwin_natl_1_stl_4_natl_1':
-        from networks.network_uniwin_natl_1_stl_4_natl_1 import Uniwin as net
-        netG = net(
-            upscale=opt_net['upscale'],
-            in_chans=opt_net['in_chans'],
-            img_size=opt_net['img_size'],
-            window_size=opt_net['window_size'],
-            kernel_size=opt_net['kernel_size'],
-            img_range=opt_net['img_range'],
-            depths=opt_net['depths'],
-            embed_dim=opt_net['embed_dim'],
-            num_heads=opt_net['num_heads'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upsampler=opt_net['upsampler'],
-            resi_connection=opt_net['resi_connection'],
-            layer_scale=opt_net['layer_scale']
-        )
-
-    elif net_type == 'uniwin_natl_first_2':
-        from networks.network_uniwin_natl_first_2 import Uniwin as net
-        netG = net(
-            upscale=opt_net['upscale'],
-            in_chans=opt_net['in_chans'],
-            img_size=opt_net['img_size'],
-            window_size=opt_net['window_size'],
-            kernel_size=opt_net['kernel_size'],
-            img_range=opt_net['img_range'],
-            depths=opt_net['depths'],
-            embed_dim=opt_net['embed_dim'],
-            num_heads=opt_net['num_heads'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upsampler=opt_net['upsampler'],
-            resi_connection=opt_net['resi_connection'],
-            layer_scale=opt_net['layer_scale']
-        )
-
-    elif net_type == 'uniwin_natl_first_3':
-        from networks.network_uniwin_natl_first_3 import Uniwin as net
-        netG = net(
-            upscale=opt_net['upscale'],
-            in_chans=opt_net['in_chans'],
-            img_size=opt_net['img_size'],
-            window_size=opt_net['window_size'],
-            kernel_size=opt_net['kernel_size'],
-            img_range=opt_net['img_range'],
-            depths=opt_net['depths'],
-            embed_dim=opt_net['embed_dim'],
-            num_heads=opt_net['num_heads'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upsampler=opt_net['upsampler'],
-            resi_connection=opt_net['resi_connection'],
-            layer_scale=opt_net['layer_scale']
-        )
-
-    elif net_type == 'uniwin_natl_first_4':
-        from networks.network_uniwin_natl_first_4 import Uniwin as net
-        netG = net(
-            upscale=opt_net['upscale'],
-            in_chans=opt_net['in_chans'],
-            img_size=opt_net['img_size'],
-            window_size=opt_net['window_size'],
-            kernel_size=opt_net['kernel_size'],
-            img_range=opt_net['img_range'],
-            depths=opt_net['depths'],
-            embed_dim=opt_net['embed_dim'],
-            num_heads=opt_net['num_heads'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upsampler=opt_net['upsampler'],
-            resi_connection=opt_net['resi_connection'],
-            layer_scale=opt_net['layer_scale']
-        )
-
-    elif net_type == 'uniwin_natl_first_6':
-        from networks.network_uniwin_natl_first_6 import Uniwin as net
-        netG = net(
-            upscale=opt_net['upscale'],
-            in_chans=opt_net['in_chans'],
-            img_size=opt_net['img_size'],
-            window_size=opt_net['window_size'],
-            kernel_size=opt_net['kernel_size'],
-            img_range=opt_net['img_range'],
-            depths=opt_net['depths'],
-            embed_dim=opt_net['embed_dim'],
-            num_heads=opt_net['num_heads'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upsampler=opt_net['upsampler'],
-            resi_connection=opt_net['resi_connection'],
-            layer_scale=opt_net['layer_scale']
-        )
-
-    elif net_type == 'swinir':
-        from networks.network_swinir import SwinIR as net
-        netG = net(
-            upscale=opt_net['upscale'],
-            in_chans=opt_net['in_chans'],
-            img_size=opt_net['img_size'],
-            window_size=opt_net['window_size'],
-            # kernel_size=opt_net['kernel_size'],
-            img_range=opt_net['img_range'],
-            depths=opt_net['depths'],
-            embed_dim=opt_net['embed_dim'],
-            num_heads=opt_net['num_heads'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upsampler=opt_net['upsampler'],
-            resi_connection=opt_net['resi_connection'],
-            layer_scale=opt_net['layer_scale']
-        )
-
-    elif net_type == 'uniwin_natl_only':
-        from networks.network_uniwin_natl_only import Uniwin as net
-        netG = net(
-            upscale=opt_net['upscale'],
-            in_chans=opt_net['in_chans'],
-            img_size=opt_net['img_size'],
-            window_size=opt_net['window_size'],
-            kernel_size=opt_net['kernel_size'],
-            img_range=opt_net['img_range'],
-            depths=opt_net['depths'],
-            embed_dim=opt_net['embed_dim'],
-            num_heads=opt_net['num_heads'],
-            mlp_ratio=opt_net['mlp_ratio'],
-            upsampler=opt_net['upsampler'],
-            resi_connection=opt_net['resi_connection'],
-            layer_scale=opt_net['layer_scale']
-        )
 
     else:
         raise NotImplementedError(f'net type [{net_type}] not implemented')
-        
+
+    netG = net(
+        upscale=opt_net['upscale'],
+        in_chans=opt_net['in_chans'],
+        img_size=opt_net['img_size'],
+        window_size=opt_net['window_size'],
+        kernel_size=opt_net['kernel_size'],
+        img_range=opt_net['img_range'],
+        depths=opt_net['depths'],
+        embed_dim=opt_net['embed_dim'],
+        num_heads=opt_net['num_heads'],
+        mlp_ratio=opt_net['mlp_ratio'],
+        upsampler=opt_net['upsampler'],
+        resi_connection=opt_net['resi_connection'],
+        layer_scale=opt_net['layer_scale']
+    )
+
     # ----------------------------------------
     # initialize weights
     # ----------------------------------------

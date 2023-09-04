@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.checkpoint as checkpoint
 from timm.models.layers import DropPath, to_2tuple, trunc_normal_
-from natten import NeighborhoodAttention2D as NeighborhoodAttention
+from natten.functional import natten2dqkrpb, natten2dav
 
 class Mlp(nn.Module):
     def __init__(
@@ -31,14 +31,63 @@ class Mlp(nn.Module):
         x = self.drop(x)
         return x
 
+class SlidingWindowAttention(nn.module):
+    def __init__(self, 
+                 dim, 
+                 kernel_size, 
+                 num_heads,
+                 qkv_bias=True, 
+                 qk_scale=None, 
+                 attn_drop=0., 
+                 proj_drop=0.,
+        ):
+        super(SlidingWindowAttention, self).__init__()
 
-class NATL(nn.Module):
-    r""" Neighborhood Attention Transformer Layer
+        self.num_heads = num_heads
+        self.head_dim = dim // self.num_heads
+        self.scale = qk_scale or self.head_dim ** -0.5
+        assert kernel_size > 1 and kernel_size % 2 == 1, \
+            f"Kernel size must be an odd number greater than 1, got {kernel_size}."
+        self.window_size = self.kernel_size = kernel_size
+
+        self.qkv = nn.Linear(dim, dim * 3, bias=qkv_bias)
+        self.rpb = nn.Parameter(torch.zeros(num_heads, (2 * kernel_size - 1), (2 * kernel_size - 1)))
+        trunc_normal_(self.rpb, std=.02, mean=0., a=-2., b=2.)
+        self.attn_drop = nn.Dropout(attn_drop)
+        self.proj = nn.Linear(dim, dim)
+        self.proj_drop = nn.Dropout(proj_drop)
+
+    def forward(self, x):
+        B, Hp, Wp, C = x.shape
+        H, W = int(Hp), int(Wp)
+        pad_l = pad_t = pad_r = pad_b = 0
+        window_size = self.window_size
+        if H < window_size or W < window_size:
+            pad_r = max(0, window_size - W)
+            pad_b = max(0, window_size - H)
+            x = F.pad(x, (0, 0, pad_l, pad_r, pad_t, pad_b))
+            _, H, W, _ = x.shape
+        qkv = self.qkv(x).reshape(B, H, W, 3, self.num_heads, self.head_dim).permute(3, 0, 4, 1, 2, 5)
+        q, k, v = qkv[0], qkv[1], qkv[2]
+        q = q * self.scale
+        attn = natten2dqkrpb(q, k, self.rpb, None)
+        attn = attn.softmax(dim=-1)
+        attn = self.attn_drop(attn)
+        x = natten2dav(attn, v, None)
+        x = x.permute(0, 2, 3, 1, 4).reshape(B, H, W, C)
+        if pad_r or pad_b:
+            x = x[:, :Hp, :Wp, :]
+
+        return self.proj_drop(self.proj(x))
+
+
+class SWALayer(nn.Module):
+    r""" Sliding Window Attention Layer (SWA)
 
     Args:
         dim (int): Embedding dimension
         num_heads (int): 
-        kernel_size (int): Kernel size of NAT. Default: 9
+        kernel_size (int): Kernel size of SWA. Default: 9
         dilation (): 
         mlp_ratio (float): 
         qkv_bias (bool): 
@@ -66,16 +115,15 @@ class NATL(nn.Module):
         norm_layer=nn.LayerNorm,
         layer_scale=None,
     ):
-        super(NATL, self).__init__()
+        super(SWALayer, self).__init__()
         self.dim = dim
         self.num_heads = num_heads
         self.mlp_ratio = mlp_ratio
 
         self.norm1 = norm_layer(dim)
-        self.attn = NeighborhoodAttention(
+        self.attn = SlidingWindowAttention(
             dim,
             kernel_size=kernel_size,
-            dilation=dilation,
             num_heads=num_heads,
             qkv_bias=qkv_bias,
             qk_scale=qk_scale,
@@ -160,8 +208,8 @@ def window_reverse(windows, window_size, H, W):
     return x
 
 
-class WindowAttention(nn.Module):
-    r""" Window based multi-head self attention (W-MSA) module with relative position bias.
+class ShiftedWindowAttention(nn.Module):
+    r""" Non-overlapping Shifted Window attention.
     It supports both of shifted and non-shifted window.
 
     Args:
@@ -174,9 +222,17 @@ class WindowAttention(nn.Module):
         proj_drop (float, optional): Dropout ratio of output. Default: 0.0
     """
 
-    def __init__(self, dim, window_size, num_heads, qkv_bias=True, qk_scale=None, attn_drop=0., proj_drop=0.):
+    def __init__(self, 
+                 dim, 
+                 window_size, 
+                 num_heads, 
+                 qkv_bias=True, 
+                 qk_scale=None, 
+                 attn_drop=0., 
+                 proj_drop=0.
+        ):
 
-        super().__init__()
+        super(ShiftedWindowAttention, self).__init__()
         self.dim = dim
         self.window_size = window_size  # Wh, Ww
         self.num_heads = num_heads
@@ -209,7 +265,10 @@ class WindowAttention(nn.Module):
         trunc_normal_(self.relative_position_bias_table, std=.02)
         self.softmax = nn.Softmax(dim=-1)
 
-    def forward(self, x, mask=None):
+    def forward(self, 
+                x, 
+                mask=None
+        ):
         """
         Args:
             x: input features with shape of (num_windows*B, N, C)
@@ -244,15 +303,15 @@ class WindowAttention(nn.Module):
         return x
 
 
-class STL(nn.Module):
-    r""" Swin Transformer Layer.
+class WALayer(nn.Module):
+    r""" Window Attention Layer (WA)
 
     Args:
         dim (int): Number of input channels.
         input_resolution (tuple[int]): Input resulotion.
         num_heads (int): Number of attention heads.
         window_size (int): Window size.
-        shift_size (int): Shift size for SW-MSA.
+        shift_size (int): Shift size.
         mlp_ratio (float): Ratio of mlp hidden dim to embedding dim.
         qkv_bias (bool, optional): If True, add a learnable bias to query, key, value. Default: True
         qk_scale (float | None, optional): Override default qk scale of head_dim ** -0.5 if set.
@@ -280,7 +339,7 @@ class STL(nn.Module):
         norm_layer=nn.LayerNorm
     ):
         
-        super(STL, self).__init__()
+        super(WALayer, self).__init__()
         self.dim = dim
         self.input_resolution = input_resolution
         self.num_heads = num_heads
@@ -294,7 +353,7 @@ class STL(nn.Module):
         assert 0 <= self.shift_size < self.window_size, "shift_size must in 0-window_size"
 
         self.norm1 = norm_layer(dim)
-        self.attn = WindowAttention(
+        self.attn = ShiftedWindowAttention(
             dim, 
             window_size=to_2tuple(self.window_size), 
             num_heads=num_heads,
@@ -423,13 +482,99 @@ class PatchMerging(nn.Module):
         return x
 
 
-class BasicLayer(nn.Module):
-    r""" A basic Swin Transformer layer for one stage.
+class UniwinAttentionLayer(nn.Module):
+    r""" Uniwin Attention Layer (UAL)
 
     Args:
         dim (int): Number of input channels.
         input_resolution (tuple[int]): Input resolution.
-        depth (int): Number of blocks.
+        num_heads (int): Number of attention heads.
+        window_size (int): Local window size.
+        mlp_ratio (float): Ratio of mlp hidden dim to embedding dim.
+        qkv_bias (bool, optional): If True, add a learnable bias to query, key, value. Default: True
+        qk_scale (float | None, optional): Override default qk scale of head_dim ** -0.5 if set.
+        drop (float, optional): Dropout rate. Default: 0.0
+        attn_drop (float, optional): Attention dropout rate. Default: 0.0
+        drop_path (float | tuple[float], optional): Stochastic depth rate. Default: 0.0
+        norm_layer (nn.Module, optional): Normalization layer. Default: nn.LayerNorm
+        use_checkpoint (bool): Whether to use checkpointing to save memory. Default: False.
+    """
+
+    def __init__(
+        self, 
+        dim, 
+        input_resolution, 
+        num_heads, 
+        window_size, 
+        kernel_size,
+        mlp_ratio=4., 
+        qkv_bias=True, 
+        qk_scale=None, 
+        drop=0., 
+        attn_drop=0.,
+        drop_path=0., 
+        norm_layer=nn.LayerNorm, 
+        use_checkpoint=False, 
+        layer_scale=None
+    ):
+        super(UniwinAttentionLayer, self).__init__()
+        
+        self.dim = dim
+        self.input_resolution = input_resolution
+        self.use_checkpoint = use_checkpoint
+
+        self.layers = nn.ModuleList(
+            [
+                SWALayer(
+                    dim=dim,
+                    num_heads=num_heads,
+                    kernel_size=kernel_size,
+                    dilation=None,
+                    mlp_ratio=mlp_ratio,
+                    qkv_bias=qkv_bias,
+                    qk_scale=qk_scale,
+                    drop=drop,
+                    attn_drop=attn_drop,
+                    drop_path=drop_path[-1] if isinstance(drop_path, list) else drop_path,
+                    act_layer=nn.GELU,
+                    norm_layer=norm_layer,
+                    layer_scale=layer_scale,
+                ),
+                WALayer(
+                    dim=dim, 
+                    input_resolution=input_resolution, 
+                    num_heads=num_heads, 
+                    window_size=window_size,
+                    shift_size=0 if (i % 2 == 0) else window_size // 2,
+                    mlp_ratio=mlp_ratio,
+                    qkv_bias=qkv_bias, 
+                    qk_scale=qk_scale,
+                    drop=drop, 
+                    attn_drop=attn_drop,
+                    drop_path=drop_path[i] if isinstance(drop_path, list) else drop_path,
+                    norm_layer=norm_layer
+                ) for i in range(2)
+            ]
+        )
+
+
+    def forward(self, x, x_size):
+        for layer in self.layers:
+            if self.use_checkpoint:
+                x = checkpoint.checkpoint(layer, x, x_size)
+            else:
+                x = layer(x, x_size)
+        return x
+
+
+
+class BasicLayer(nn.Module):
+    r""" A basic Transformer layer for one stage.
+
+    Args:
+        dim (int): Number of input channels.
+        input_resolution (tuple[int]): Input resolution.
+        depth (int): Number of UAL.
         num_heads (int): Number of attention heads.
         window_size (int): Local window size.
         mlp_ratio (float): Ratio of mlp hidden dim to embedding dim.
@@ -447,7 +592,7 @@ class BasicLayer(nn.Module):
         self, 
         dim, 
         input_resolution, 
-        depth, 
+        depth,
         num_heads, 
         window_size, 
         kernel_size,
@@ -470,41 +615,25 @@ class BasicLayer(nn.Module):
         self.use_checkpoint = use_checkpoint
 
         # build blocks
-        self.blocks = nn.ModuleList(
+        self.blocks = nn.ModuleLiat(
             [
-                STL(
-                    dim=dim, 
+                UniwinAttentionLayer(
+                    dim=dim,
                     input_resolution=input_resolution, 
                     num_heads=num_heads, 
-                    window_size=window_size,
-                    shift_size=0 if (i % 2 == 0) else window_size // 2,
-                    mlp_ratio=mlp_ratio,
+                    window_size=window_size, 
+                    kernel_size=kernel_size,
+                    mlp_ratio=mlp_ratio, 
                     qkv_bias=qkv_bias, 
-                    qk_scale=qk_scale,
+                    qk_scale=qk_scale, 
                     drop=drop, 
                     attn_drop=attn_drop,
-                    drop_path=drop_path[i] if isinstance(drop_path, list) else drop_path,
-                    norm_layer=norm_layer
+                    drop_path=drop_path, 
+                    norm_layer=norm_layer, 
+                    use_checkpoint=use_checkpoint, 
+                    layer_scale=layer_scale
                 ) for i in range(depth)
             ]
-        )
-
-        self.blocks.append(
-            NATL(
-                dim=dim,
-                num_heads=num_heads,
-                kernel_size=kernel_size,
-                dilation=None,
-                mlp_ratio=mlp_ratio,
-                qkv_bias=qkv_bias,
-                qk_scale=qk_scale,
-                drop=drop,
-                attn_drop=attn_drop,
-                drop_path=drop_path[-1] if isinstance(drop_path, list) else drop_path,
-                act_layer=nn.GELU,
-                norm_layer=norm_layer,
-                layer_scale=layer_scale,
-            )
         )
 
         # patch merging layer
@@ -522,7 +651,7 @@ class BasicLayer(nn.Module):
         if self.downsample is not None:
             x = self.downsample(x)
         return x
-
+    
 
 class PatchEmbed(nn.Module):
     r""" Image to Patch Embedding
@@ -623,16 +752,16 @@ class Upsample(nn.Sequential):
         super(Upsample, self).__init__(*m)
 
 
-class RUTB(nn.Module):
-    """Residual Uniwin Transformer Block (RUTB).
+class RUAB(nn.Module):
+    """Residual Uniwin Attention Block (RUAB).
 
     Args:
         dim (int): Number of input channels.
         input_resolution (tuple[int]): Input resolution.
         depth (int): Number of blocks.
         num_heads (int): Number of attention heads.
-        window_size (int): Local window size.
-        kernel_size (int): Kernel size of NAT.
+        window_size (int): Window size of Shifted Window Attention Layer((s)WA). Default: 16
+        kernel_size (int): Kernel size of Sliding Window Attention Layer(SWA). Default: 9
         mlp_ratio (float): Ratio of mlp hidden dim to embedding dim.
         qkv_bias (bool, optional): If True, add a learnable bias to query, key, value. Default: True
         qk_scale (float | None, optional): Override default qk scale of head_dim ** -0.5 if set.
@@ -669,7 +798,7 @@ class RUTB(nn.Module):
         resi_connection='1conv', 
         layer_scale=None
     ):
-        super(RUTB, self).__init__()
+        super(RUAB, self).__init__()
 
         self.dim = dim
         self.input_resolution = input_resolution
@@ -724,10 +853,10 @@ class Uniwin(nn.Module):
         patch_size (int | tuple(int)): Patch size. Default: 1
         in_chans (int): Number of input image channels. Default: 3
         embed_dim (int): Patch embedding dimension. Default: 180
-        depths (tuple(int)): Depth of each Swin Transformer layer(STL). Default: [6, 6, 6, 6, 6, 6]
+        depths (tuple(int)): Depths of each Uniwin Attention Layer(UAL). Default: [2, 2, 2, 2, 2, 2]
         num_heads (tuple(int)): Number of attention heads in different layers. Default: [6, 6, 6, 6, 6, 6]
-        window_size (int): Window size. Default: 16
-        kernel_size (int): Kernel size of Neighborhood Attention Transformer Layer(NATL). Default: 9 
+        window_size (int): Window size of Shifted Window Attention Layer((s)WA). Default: 16
+        kernel_size (int): Kernel size of Sliding Window Attention Layer(SWA). Default: 9
         mlp_ratio (float): Ratio of mlp hidden dim to embedding dim. Default: 4.
         qkv_bias (bool): If True, add a learnable bias to query, key, value. Default: True
         qk_scale (float): Override default qk scale of head_dim ** -0.5 if set. Default: None
@@ -750,7 +879,7 @@ class Uniwin(nn.Module):
         patch_size=1,
         in_chans=3,
         embed_dim=180,
-        depths=[6, 6, 6, 6, 6, 6], 
+        depths=[2, 2, 2, 2, 2, 2], 
         num_heads=[6, 6, 6, 6, 6, 6],
         window_size=16, 
         kernel_size=9, 
@@ -829,7 +958,7 @@ class Uniwin(nn.Module):
         # build Residual Uniwin Transformer blocks (RUTB)
         self.layers = nn.ModuleList()
         for i_layer in range(self.num_layers):
-            layer = RUTB(
+            layer = RUAB(
                 dim=embed_dim,
                 input_resolution=(patches_resolution[0],patches_resolution[1]),
                 depth=depths[i_layer],
