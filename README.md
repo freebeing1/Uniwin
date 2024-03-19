@@ -1,11 +1,20 @@
 # Image Super-Resolution with Unified Window Attention
 
+Gunhee Cho and YongSuk Choi
+
+Artificial Intelligence Lab, Hanyang University, Seoul, Korea
+
+---
+
+This repository is the official Pytorch implementation of [Image Super-resolution with Unified Window Attention](https://ieeexplore.ieee.org/document/10443465).
+
 ## Architecture
 ![arch](figs/fig_arch.png)
 ## Results
 <details>
 <summary>Quantitative Results</summary>
 <p align="center">
+  <img width="900" src="figs/fig3.png">
   <img width="900" src="figs/tab1.png">
   <img width="900" src="figs/tab2.png">
   <img width="900" src="figs/tab3.png">
@@ -17,6 +26,9 @@
 <p align="center">
   <img width="900" src="figs/visual_comparison_1.png">
   <img width="900" src="figs/visual_comparison_2.png">
+  <img width="900" src="figs/visual_comparison_10.png">
+  <img width="900" src="figs/visual_comparison_11.png">
+  <img width="900" src="figs/visual_comparison_12.png">
   <img width="900" src="figs/visual_comparison_3.png">
   <img width="900" src="figs/visual_comparison_4.png">
   <img width="900" src="figs/visual_comparison_5.png">
@@ -32,8 +44,9 @@
 <p align="center">
   <img width="900" src="figs/tab4.png">
   <img width="900" src="figs/tab5.png">
-  <img width="900" src="figs/fig_mean_attention_distance.png">
-  <img width="900" src="figs/fig_lam.png">
+  <img width="900" src="figs/fig10.png">
+  <img width="900" src="figs/fig11.png">
+  <img width="900" src="figs/fig12.png">
 </p>
 </details>
 
